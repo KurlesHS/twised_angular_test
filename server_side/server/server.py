@@ -11,7 +11,13 @@ class FileNoDir(File):
 
 
 class Root(Resource):
-    server_instance = None
+    def __init__(self, server):
+        """
+
+            :type server: Server
+            """
+        Resource.__init__(self)
+        self.server = server
 
     def getChild(self, path, request):
         """
@@ -20,11 +26,14 @@ class Root(Resource):
         """
         print 'getChild', path, request
         paths = request.prepath + request.postpath
-        paths.remove('')
+        try:
+            paths.remove('')
+        except ValueError:
+            pass
         s = '/' + '/'.join(paths)
 
         try:
-            r = Server.routes[s]
+            r = self.server.routes[s]
             return r
         except KeyError:
             pass
@@ -33,9 +42,6 @@ class Root(Resource):
 
 
 class Server(object):
-    instance = None
-    routes = {}
-
     def __init__(self, client_side_path):
         self.client_side_path = client_side_path
         self.site = None
@@ -43,8 +49,7 @@ class Server(object):
         Server.instance = self
 
     def run(self):
-        root = Root()
-        Root.server_instance = self
+        root = Root(self)
         self.site = Site(root)
         root.putChild("static", FileNoDir(os.path.join(self.client_side_path, 'static')))
         root.putChild("app", FileNoDir(os.path.join(self.client_side_path, 'app')))
@@ -53,17 +58,15 @@ class Server(object):
         reactor.listenTCP(8888, self.site)
         reactor.run()
 
-    @staticmethod
-    def route(fn):
-        def wrapper(path):
+    def route(self, path):
+        def wrapper(fn):
             """
 
             :type path: str
             """
             r = Resource()
-            r.render = path
+            r.render_GET = fn
             r.isLeaf = True
-            Server.routes[fn] = r
+            self.routes[path] = r
             return fn
-
         return wrapper

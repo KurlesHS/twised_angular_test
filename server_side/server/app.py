@@ -36,6 +36,12 @@ class App(object):
         self.server = server
         self.setup_route(self.server)
         self.auth_users = dict()
+        self.users = {
+            'admin': 'admin'
+        }
+
+    def login(self, request):
+        pass
 
     def setup_route(self, server):
         @server.route('/', methods=['GET'])
@@ -45,6 +51,10 @@ class App(object):
             f = File(index_path)
             f.isLeaf = True
             return f
+
+        @server.route('/api/1.0/login')
+        def login_path(request):
+            return self.login(request)
 
         @server.route('/templates', branch=True)
         def templates_path(_):

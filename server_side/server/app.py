@@ -1,6 +1,9 @@
+import os
 from twisted.cred.credentials import DigestedCredentials
 from twisted.internet.defer import succeed
 from functools import wraps
+from twisted.web.resource import ForbiddenResource
+from twisted.web.static import File
 
 
 def require_auth(*args, **kwargs):
@@ -20,16 +23,41 @@ def require_auth(*args, **kwargs):
 
 
 class App(object):
-    def __init__(self, server):
+    class FileNoDir(File):
+        def directoryListing(self):
+            return ForbiddenResource()
+
+    def __init__(self, server, root_path):
         """
 
         :type server: klein.app.Klein
         """
+        self.root_path = root_path
         self.server = server
         self.setup_route(self.server)
 
-    @staticmethod
-    def setup_route(server):
+    def setup_route(self, server):
+        @server.route('/', methods=['GET'])
+        def index(_):
+            index_path = os.path.join(self.root_path, 'templates', 'index.html')
+            print index_path
+            file = File(index_path);
+            file.isLeaf = True
+            print file.exists()
+            return file
+
+        @server.route('/templates')
+        def templates_path(_):
+            return App.FileNoDir(os.path.join(self.root_path, 'templates'))
+
+        @server.route('/static')
+        def templates_path(_):
+            return App.FileNoDir(os.path.join(self.root_path, 'static'))
+
+        @server.route('/app', branch=True)
+        def app_path(_):
+            return App.FileNoDir(os.path.join(self.root_path, 'app'))
+
         @server.route('/hello/word', methods=['GET'])
         def test(request):
             """

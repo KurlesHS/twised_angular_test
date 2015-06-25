@@ -35,28 +35,28 @@ class App(object):
         self.root_path = root_path
         self.server = server
         self.setup_route(self.server)
+        self.auth_users = dict()
 
     def setup_route(self, server):
         @server.route('/', methods=['GET'])
         def index(_):
             index_path = os.path.join(self.root_path, 'templates', 'index.html')
             print index_path
-            file = File(index_path);
-            file.isLeaf = True
-            print file.exists()
-            return file
+            f = File(index_path)
+            f.isLeaf = True
+            return f
 
         @server.route('/templates', branch=True)
         def templates_path(_):
-            return App.FileNoDir(os.path.join(self.root_path, 'templates'))
+            return File(os.path.join(self.root_path, 'templates'))
 
         @server.route('/static', branch=True)
-        def templates_path(_):
-            return App.FileNoDir(os.path.join(self.root_path, 'static'))
+        def static_path(_):
+            return File(os.path.join(self.root_path, 'static'))
 
         @server.route('/app', branch=True)
         def app_path(_):
-            return App.FileNoDir(os.path.join(self.root_path, 'app'))
+            return File(os.path.join(self.root_path, 'app'))
 
         @server.route('/hello/word', methods=['GET'])
         def test(request):
@@ -89,5 +89,5 @@ class App(object):
                                'qop="auth",'
                                'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093",'
                                'opaque="5ccc069c403ebaf9f0171e9517f40e41"')
-            response.setResponseCode(401)
+            response.setResponseCode(402)
             return "Fuck you"

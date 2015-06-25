@@ -46,11 +46,11 @@ class App(object):
             print file.exists()
             return file
 
-        @server.route('/templates')
+        @server.route('/templates', branch=True)
         def templates_path(_):
             return App.FileNoDir(os.path.join(self.root_path, 'templates'))
 
-        @server.route('/static')
+        @server.route('/static', branch=True)
         def templates_path(_):
             return App.FileNoDir(os.path.join(self.root_path, 'static'))
 

@@ -1,20 +1,25 @@
-(function(){
+(function () {
     "use strict";
     angular.module('app')
-        .controller('LoginController', function($scope) {
-            $scope.name = '';
-            $scope.password = '';
-            $scope.isAuthorized = false;
-            $scope.login = function() {
-                console.log('try to login with login ', $scope.name, 'and password ', $scope.password);
-                $scope.isAuthorized = true;
+        .controller('LoginController', ["$scope", "LoginService", function ($scope, LoginService) {
+            $scope.loginService = LoginService;
+            $scope.name = LoginService.name;
+            $scope.password = LoginService.password;
 
+            $scope.setAuthorized = function(auth) {
+                console.log('set auth in controller:', auth);
+               $scope.isAuthorized = auth;
             };
-            $scope.logout = function() {
+            LoginService.addListener($scope.setAuthorized);
+
+            $scope.logout = function () {
                 console.log('try to logout');
-                $scope.isAuthorized = false;
-                $scope.$apply()
+                LoginService.logout();
             };
 
-        })
+            $scope.login = function () {
+                console.log('try to login');
+                LoginService.login($scope.name, $scope.password);
+            };
+        }]);
 })();

@@ -1,6 +1,6 @@
 (function() {
-    angular.module('app', ['ui.router',]).controller('MainController', function($scope) {
-        $scope.name = ''
+    "use strict";
+    angular.module('app', ['ui.router', 'angular-md5']).controller('MainController', function($scope) {
 
     }).
     config(function($stateProvider, $urlRouterProvider) {
